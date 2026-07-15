@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://sauna-map.example.com/sitemap.xml
