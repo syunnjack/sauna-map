@@ -1,4 +1,4 @@
 User-agent: *
-Disallow:
+Allow: /
 
-Sitemap: https://sauna-map.example.com/sitemap.xml
+Sitemap: https://sauna-map.vercel.app/sitemap.xml
