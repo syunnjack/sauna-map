@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://sauna-map.vercel.app/sitemap.xml
+Sitemap: https://sauna-map.jp/sitemap.xml
