@@ -17,6 +17,12 @@ Route::post('/venues/{venue}/congestion', [VenueController::class, 'reportConges
 Route::view('/thanks', 'venues.thanks')->name('venues.thanks');
 
 Route::view('/about', 'about')->name('about');
+Route::get('/area/{areaSlug}', [VenueController::class, 'area'])
+    ->whereAlpha('areaSlug')
+    ->name('venues.area');
+Route::get('/area/{areaSlug}/{typeSlug}', [VenueController::class, 'area'])
+    ->whereAlpha(['areaSlug', 'typeSlug'])
+    ->name('venues.area.type');
 Route::get('/sitemap.xml', [VenueController::class, 'sitemap'])->name('sitemap');
 
 // LINE連携（お気に入り施設の混雑状況通知）

@@ -1,7 +1,7 @@
 @extends('layouts.plain')
 
-@section('title', $venue->name . ' の混雑状況・サ活 | ' . config('app.name'))
-@section('description', $venue->name . '（' . ($venue->area ?? 'サウナ・銭湯') . '）の場所・今の混雑状況・利用者のサ活（写真付き口コミ）を確認できます。')
+@section('title', $venue->name . '（' . trim(($venue->area ?? '') . ' ' . ($venue->facility_type ?? 'サウナ・銭湯')) . '）の混雑状況・サ活 | ' . config('app.name'))
+@section('description', $venue->name . '（' . trim(($venue->area ?? '') . ' ' . ($venue->facility_type ?? 'サウナ・銭湯')) . '）の場所・営業時間・今の混雑状況・利用者のサ活（写真付き口コミ）を確認できます。')
 
 @push('structured-data')
 <script type="application/ld+json">
@@ -10,7 +10,12 @@
   '@type' => 'BreadcrumbList',
   'itemListElement' => [
       ['@type' => 'ListItem', 'position' => 1, 'name' => config('app.name'), 'item' => url('/')],
-      ['@type' => 'ListItem', 'position' => 2, 'name' => $venue->name, 'item' => url("/venues/{$venue->id}")],
+      ...($venue->area_slug ? [[
+          '@type' => 'ListItem', 'position' => 2, 'name' => $venue->area,
+          'item' => route('venues.area', $venue->area_slug),
+      ]] : []),
+      ['@type' => 'ListItem', 'position' => $venue->area_slug ? 3 : 2, 'name' => $venue->name,
+       'item' => url("/venues/{$venue->id}")],
   ],
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
 </script>
@@ -41,13 +46,41 @@
       @endif
       <p class="text-muted mb-2">{{ $venue->description }}</p>
       @if($venue->area)
-        <p class="text-secondary small mb-1">エリア: {{ $venue->area }}</p>
+        <p class="text-secondary small mb-1">
+          エリア:
+          @if($venue->area_slug)
+            <a href="{{ route('venues.area', $venue->area_slug) }}">{{ $venue->area }}</a>
+            @if($venue->type_slug)
+              <a href="{{ route('venues.area.type', [$venue->area_slug, $venue->type_slug]) }}" class="ms-1">{{ $venue->area }}の{{ $venue->facility_type }}一覧</a>
+            @endif
+          @else
+            {{ $venue->area }}
+          @endif
+        </p>
       @endif
       @if($venue->address)
         <p class="text-secondary small mb-1">住所: {{ $venue->address }}</p>
       @endif
       @if($venue->phone)
-        <p class="text-secondary small mb-4">電話: {{ $venue->phone }}</p>
+        <p class="text-secondary small mb-1">電話: {{ $venue->phone }}</p>
+      @endif
+      @if($venue->opening_hours)
+        <p class="text-secondary small mb-1">営業時間（OpenStreetMapの記載）: {{ $venue->opening_hours }}</p>
+      @endif
+      @if($venue->website)
+        <p class="text-secondary small mb-1">
+          公式サイト: <a href="{{ $venue->website }}" rel="nofollow noopener" target="_blank">{{ $venue->website }}</a>
+        </p>
+      @endif
+
+      @if($venue->is_from_osm)
+        <div class="alert alert-light border small mt-3 mb-4">
+          この施設の名称・場所は
+          <a href="https://www.openstreetmap.org/{{ $venue->source_ref }}" rel="nofollow noopener" target="_blank">OpenStreetMap</a>
+          のデータ（&copy; OpenStreetMap contributors、ODbL 1.0）をもとに掲載しています。
+          営業時間・料金・サウナの有無は施設によって異なり、休業している場合もあります。
+          混雑状況とサ活は利用者の投稿です。お出かけの前に施設へご確認ください。
+        </div>
       @endif
 
       <div class="mb-3">
